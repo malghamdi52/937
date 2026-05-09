@@ -76,8 +76,19 @@
 
         @media print {
             /* ── Page Setup ── */
-            @page { size: A4 landscape; margin: 12mm 10mm; }
-            @page :first { margin-top: 8mm; }
+            /* ── Page Setup — Professional Print ── */
+            @page {
+                size: A4 landscape;
+                margin: 10mm 12mm 14mm 12mm;
+            }
+            @page :first {
+                margin-top: 8mm;
+            }
+            /* Portrait للتبويبات التي تحتاج طول أكثر */
+            @page portrait-page {
+                size: A4 portrait;
+                margin: 10mm 12mm;
+            }
 
             /* ── Global Reset ── */
             body, html {
@@ -86,8 +97,27 @@
                 height: auto !important;
                 overflow: visible !important;
                 font-family: 'Cairo', sans-serif !important;
+                /* إلغاء Safe Area أثناء الطباعة */
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: none !important;
+                width: 100% !important;
             }
-            * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                /* منع overflow القص أثناء الطباعة */
+                max-width: none !important;
+            }
+            /* إلغاء تأثير transform الـ responsive على الطباعة */
+            #sidebar-filters,
+            #home-cards-view,
+            #tabs-container,
+            #tabs-header {
+                -webkit-transform: none !important;
+                transform: none !important;
+            }
 
             /* ── Hide non-print UI ── */
             .print-hide { display: none !important; }
@@ -103,13 +133,37 @@
             body.print-single-tab .tab-content.active { display: block !important; }
             body.print-annual #tab-annual { display: block !important; }
 
-            /* ── Layout ── */
+            /* ── Layout — Full Page Utilization ── */
             .main-content, #main-view-container, #tabs-container {
                 overflow: visible !important;
                 height: auto !important;
                 display: block !important;
                 width: 100% !important;
                 padding: 0 !important;
+                max-width: none !important;
+                box-sizing: border-box !important;
+            }
+            /* Grid — استغلال كامل العرض */
+            .grid {
+                display: grid !important;
+                width: 100% !important;
+            }
+            .grid.grid-cols-1 { grid-template-columns: 1fr !important; }
+            .grid.grid-cols-2,
+            .grid.md\:grid-cols-2 { grid-template-columns: 1fr 1fr !important; }
+            .grid.grid-cols-3,
+            .grid.md\:grid-cols-3,
+            .grid.xl\:grid-cols-3 { grid-template-columns: 1fr 1fr 1fr !important; }
+            .grid.grid-cols-4,
+            .grid.md\:grid-cols-4,
+            .grid.lg\:grid-cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
+            /* Flex containers */
+            .flex { display: flex !important; flex-wrap: wrap !important; }
+            .flex-col { flex-direction: column !important; }
+            /* منع انكماش العناصر */
+            .flex > *, .grid > * {
+                min-width: 0 !important;
+                flex-shrink: 0 !important;
             }
 
             /* ── Section Header Banner ── */
@@ -316,20 +370,44 @@
             .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
             .overflow-auto, .overflow-hidden, .overflow-y-auto { overflow: visible !important; height: auto !important; max-height: none !important; }
 
-            /* ── Charts ── */
+            /* ── Charts — Professional Print Rendering ── */
             canvas {
                 max-width: 100% !important;
-                min-height: 180px !important;
-                height: auto !important;
+                width: 100% !important;
+                /* لا تضع height: auto — يُفسد Chart.js */
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 display: block !important;
+                /* منع القص */
+                overflow: visible !important;
+                /* جودة عالية */
+                image-rendering: -webkit-optimize-contrast !important;
+                image-rendering: crisp-edges !important;
+            }
+            /* حاوية الـ chart — منع الانكماش */
+            [style*="height:"] canvas,
+            [style*="height:"] {
+                overflow: visible !important;
             }
             .chart-box {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 margin-bottom: 18px !important;
                 display: block !important;
+                overflow: visible !important;
+                width: 100% !important;
+            }
+            /* حاويات الـ chart المحددة الارتفاع */
+            div[style*="height:280px"],
+            div[style*="height:320px"],
+            div[style*="height:350px"],
+            div[style*="height:400px"],
+            div[style*="height:260px"],
+            div[style*="height:300px"] {
+                height: auto !important;
+                min-height: 220px !important;
+                overflow: visible !important;
+                position: relative !important;
             }
 
             /* ── Cards & Blocks ── */
@@ -373,6 +451,39 @@
             .text-xs { font-size: 10px !important; }
             .text-sm { font-size: 11px !important; }
             .font-bold { font-weight: 700 !important; }
+
+            /* ── Mobile Print Override — إلغاء Responsive أثناء الطباعة ── */
+            /* إلغاء Drawer Sidebar */
+            #sidebar-filters {
+                position: static !important;
+                transform: none !important;
+                width: auto !important;
+                height: auto !important;
+                box-shadow: none !important;
+                z-index: auto !important;
+            }
+            /* إخفاء Overlay وزر Hamburger */
+            #sidebar-overlay,
+            #mob-sidebar-btn { display: none !important; }
+            /* إلغاء تأثير overflow-hidden على body أثناء الطباعة */
+            body { overflow: visible !important; height: auto !important; }
+            /* إلغاء الـ font-size: 16px للـ inputs (للطباعة فقط) */
+            input, select, textarea { font-size: 10px !important; }
+            /* KPI Cards — منع الانضغاط */
+            [id^="kpi"] { page-break-inside: avoid !important; break-inside: avoid !important; }
+            /* منع الصور والأيقونات من القص */
+            svg, i.fa-solid, i.fa-regular { overflow: visible !important; }
+            /* منع النصوص من الاختفاء بسبب overflow */
+            .truncate { overflow: visible !important; text-overflow: clip !important; white-space: normal !important; }
+            .whitespace-nowrap { white-space: normal !important; }
+            /* تحسين قراءة الجداول */
+            .data-table { font-size: 9px !important; }
+            .data-table td, .data-table th { padding: 4px 6px !important; }
+            /* منع قص المبيان التفصيلي */
+            #mttrFacilityBreakdown { grid-template-columns: 1fr 1fr 1fr !important; }
+            /* إظهار hide على الموبايل للطباعة */
+            .sm\:inline { display: inline !important; }
+            .md\:flex { display: flex !important; }
         }
 
             /* ── تحليل المواسم/الأعطال في الطباعة الشاملة ── */
@@ -2079,6 +2190,44 @@
         /* ══════════════════════════════════════════════════
            RESPONSIVE CHART RESIZE
            ══════════════════════════════════════════════════ */
+        /* ══════════════════════════════════════════════════
+           PRINT EVENT LISTENERS — Auto Chart Fix
+           ══════════════════════════════════════════════════ */
+        window.addEventListener('beforeprint', function() {
+            // إيقاف animations فورياً
+            try {
+                Chart.defaults.animation = false;
+                Chart.defaults.animations = false;
+            } catch(e) {}
+            // resize جميع الـ charts
+            Object.values(chartsInstance || {}).forEach(c => {
+                try {
+                    if (c && c.canvas) {
+                        c.options.animation = false;
+                        c.resize();
+                        c.update('none');
+                    }
+                } catch(e) {}
+            });
+            // إخفاء Overlay للهاتف
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        window.addEventListener('afterprint', function() {
+            // إعادة تفعيل animations
+            try {
+                Chart.defaults.animation = { duration: 400 };
+            } catch(e) {}
+            // resize مرة أخرى بعد الطباعة
+            setTimeout(function() {
+                Object.values(chartsInstance || {}).forEach(c => {
+                    try { if (c && c.canvas) c.resize(); } catch(e) {}
+                });
+            }, 200);
+        });
+
         let _resizeTimer;
         window.addEventListener('resize', function() {
             clearTimeout(_resizeTimer);
@@ -3858,73 +4007,200 @@
         window.openPasswordModal = function() { window.closeExportModal(); let em = document.getElementById('set-password-modal'); if(em) em.classList.remove('hidden'); };
         window.closePasswordModal = function() { let em = document.getElementById('set-password-modal'); if(em) em.classList.add('hidden'); };
 
+        /* ══════════════════════════════════════════════════════
+           PROFESSIONAL PRINT PIPELINE ENGINE
+           ══════════════════════════════════════════════════════ */
+
+        /**
+         * مرحلة 1: تهيئة جميع الـ charts للطباعة
+         * - إيقاف الـ animations
+         * - resize لاستغلال العرض الكامل
+         * - update بدون animation
+         * - انتظار اكتمال الرسم
+         */
+        window._prepareChartsForPrint = function() {
+            return new Promise(function(resolve) {
+                const charts = Object.values(chartsInstance || {}).filter(c => c && c.canvas);
+                if (charts.length === 0) { resolve(); return; }
+
+                // إيقاف animation مؤقتاً
+                charts.forEach(c => {
+                    try {
+                        if (c.options) {
+                            c._savedAnimation = c.options.animation;
+                            c.options.animation = false;
+                            if (c.options.animations) {
+                                c._savedAnimations = c.options.animations;
+                                c.options.animations = false;
+                            }
+                        }
+                    } catch(e) {}
+                });
+
+                // resize أولاً لضمان الأبعاد الصحيحة
+                charts.forEach(c => {
+                    try {
+                        // جعل canvas يملأ حاويته كاملاً
+                        if (c.canvas && c.canvas.parentElement) {
+                            const parent = c.canvas.parentElement;
+                            const w = parent.offsetWidth || 600;
+                            c.canvas.style.width = w + 'px';
+                            c.canvas.style.maxWidth = '100%';
+                        }
+                        c.resize();
+                    } catch(e) {}
+                });
+
+                // انتظار frame ثم update
+                requestAnimationFrame(function() {
+                    charts.forEach(c => {
+                        try { c.update('none'); } catch(e) {}
+                    });
+
+                    // انتظار frame ثانٍ للتأكد من اكتمال الرسم
+                    requestAnimationFrame(function() {
+                        resolve();
+                    });
+                });
+            });
+        };
+
+        /**
+         * مرحلة 2: استعادة الـ charts بعد الطباعة
+         */
+        window._restoreChartsAfterPrint = function() {
+            const charts = Object.values(chartsInstance || {}).filter(c => c && c.canvas);
+            charts.forEach(c => {
+                try {
+                    if (c._savedAnimation !== undefined) {
+                        c.options.animation = c._savedAnimation;
+                        delete c._savedAnimation;
+                    }
+                    if (c._savedAnimations !== undefined) {
+                        c.options.animations = c._savedAnimations;
+                        delete c._savedAnimations;
+                    }
+                    // إزالة الـ inline style المؤقت
+                    if (c.canvas) {
+                        c.canvas.style.width = '';
+                        c.canvas.style.maxWidth = '';
+                    }
+                    c.resize();
+                } catch(e) {}
+            });
+        };
+
+        /**
+         * Pipeline المركزي للطباعة
+         * @param {Function} setupFn - دالة الإعداد قبل الطباعة
+         * @param {Function} cleanupFn - دالة التنظيف بعد الطباعة
+         */
+        window._executePrintPipeline = function(setupFn, cleanupFn) {
+            // Step 1: إعداد UI
+            setupFn();
+
+            // Step 2: إخفاء Responsive overlay و sidebar
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Step 3: انتظار DOM update
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    // Step 4: تهيئة الـ charts
+                    window._prepareChartsForPrint().then(function() {
+                        // Step 5: انتظار إضافي لضمان اكتمال render الـ canvas
+                        setTimeout(function() {
+                            // Step 6: تنفيذ الطباعة
+                            window.print();
+
+                            // Step 7: استعادة النظام بعد الطباعة
+                            setTimeout(function() {
+                                window._restoreChartsAfterPrint();
+                                cleanupFn();
+                            }, 300);
+                        }, 400);
+                    });
+                });
+            });
+        };
+
         window.executeNativePrint = function(type) {
-            let em = document.getElementById('export-modal'); if(em) em.classList.add('hidden');
-            let ph = document.getElementById('printHeader'); if(ph) ph.classList.remove('hidden');
-            setTxt('printReportMode', type === 'executive' ? "تقرير استراتيجي للإدارة" : "تقرير تحليلي شامل");
+            const printClass = type === 'executive' ? 'print-executive' : 'print-full';
 
-            document.body.classList.add('is-printing', type === 'executive' ? 'print-executive' : 'print-full');
+            window._executePrintPipeline(
+                // ── Setup ──
+                function() {
+                    let em = document.getElementById('export-modal');
+                    if(em) em.classList.add('hidden');
+                    let ph = document.getElementById('printHeader');
+                    if(ph) ph.classList.remove('hidden');
+                    setTxt('printReportMode', type === 'executive' ? 'تقرير استراتيجي للإدارة' : 'تقرير تحليلي شامل');
 
-            // ── إخفاء العناصر التي لا يجب طباعتها ──
-            let ss = document.getElementById('startup-screen');
-            if(ss) { ss.style.display = 'none'; ss.style.setProperty('display','none','important'); }
-            let sb = document.getElementById('sidebar-filters');
-            if(sb) { sb.style.display = 'none'; sb.style.setProperty('display','none','important'); }
-            let hcv = document.getElementById('home-cards-view'); if(hcv) hcv.classList.add('hidden');
-            let tc = document.getElementById('tabs-container'); if(tc) tc.classList.remove('hidden');
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'block');
+                    document.body.classList.add('is-printing', printClass);
 
-            // ── توليد تحليل المواسم والأعطال للتقرير الشامل ──
-            if (type === 'full') {
-                try { window._populateSeasonsPrintBlocks && window._populateSeasonsPrintBlocks(); } catch(e) { console.warn('seasons print blocks error', e); }
-                try { window._populateOutagesPrintBlocks && window._populateOutagesPrintBlocks(); } catch(e) { console.warn('outages print blocks error', e); }
-            }
+                    let ss = document.getElementById('startup-screen');
+                    if(ss) ss.style.setProperty('display','none','important');
+                    let sb = document.getElementById('sidebar-filters');
+                    if(sb) sb.style.setProperty('display','none','important');
+                    let hcv = document.getElementById('home-cards-view');
+                    if(hcv) hcv.classList.add('hidden');
+                    let tc = document.getElementById('tabs-container');
+                    if(tc) tc.classList.remove('hidden');
+                    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'block');
 
-            setTimeout(() => {
-                Object.values(chartsInstance).forEach(c => { if(c && c.canvas) { c.resize(); c.update('none'); } });
-                setTimeout(() => {
-                    window.print();
-                    document.body.classList.remove('is-printing', 'print-executive', 'print-full');
+                    if (type === 'full') {
+                        try { window._populateSeasonsPrintBlocks && window._populateSeasonsPrintBlocks(); } catch(e) {}
+                        try { window._populateOutagesPrintBlocks && window._populateOutagesPrintBlocks(); } catch(e) {}
+                    }
+                },
+                // ── Cleanup ──
+                function() {
+                    document.body.classList.remove('is-printing', printClass);
+                    let ph = document.getElementById('printHeader');
                     if(ph) ph.classList.add('hidden');
+                    let sb = document.getElementById('sidebar-filters');
+                    if(sb) sb.style.removeProperty('display');
                     document.querySelectorAll('.tab-content').forEach(el => el.style.display = '');
-                    // ── تنظيف حاويات الطباعة ──
-                    const sc = document.getElementById('seasons-analysis-print-container'); if(sc) { sc.innerHTML=''; sc.style.display='none'; }
-                    const oc = document.getElementById('outages-analysis-print-container'); if(oc) { oc.innerHTML=''; oc.style.display='none'; }
-                    window.goHome(); 
-                    setTimeout(() => { Object.values(chartsInstance).forEach(c => { if(c && c.canvas) c.resize(); }); }, 100);
-                }, 800); 
-            }, 100);
+                    const sc = document.getElementById('seasons-analysis-print-container');
+                    if(sc) { sc.innerHTML = ''; sc.style.display = 'none'; }
+                    const oc = document.getElementById('outages-analysis-print-container');
+                    if(oc) { oc.innerHTML = ''; oc.style.display = 'none'; }
+                    window.goHome();
+                }
+            );
         };
 
         window.printActiveTab = function(tN, isAnn=false) {
-            document.body.classList.add('is-printing', isAnn ? 'print-annual' : 'print-single-tab');
-            let ph = document.getElementById('printHeader'); if(ph) ph.classList.remove('hidden');
-            setTxt('printReportMode', `تقرير: ${tN}`);
-
-            // ── إخفاء العناصر التي لا يجب طباعتها ──
-            let ss = document.getElementById('startup-screen');
-            if(ss) { ss.style.setProperty('display','none','important'); }
-            let sb = document.getElementById('sidebar-filters');
-            if(sb) { sb.style.setProperty('display','none','important'); }
-
-            let tc = document.getElementById('tabs-container'); if(tc) tc.classList.remove('hidden');
-
-            // التأكد من ظهور التبويب النشط حتى لو كانت print-hide (مثل tab-custom-report)
+            const printClass = isAnn ? 'print-annual' : 'print-single-tab';
             const activeTab = document.querySelector('.tab-content.active');
-            if(activeTab) { activeTab.style.setProperty('display','block','important'); }
 
-            setTimeout(() => { 
-                Object.values(chartsInstance).forEach(c => { if(c && c.canvas) { c.resize(); c.update('none'); } });
-                setTimeout(() => {
-                    window.print(); 
-                    document.body.classList.remove('is-printing', 'print-single-tab', 'print-annual'); 
+            window._executePrintPipeline(
+                // ── Setup ──
+                function() {
+                    document.body.classList.add('is-printing', printClass);
+                    let ph = document.getElementById('printHeader');
+                    if(ph) ph.classList.remove('hidden');
+                    setTxt('printReportMode', 'تقرير: ' + tN);
+
+                    let ss = document.getElementById('startup-screen');
+                    if(ss) ss.style.setProperty('display','none','important');
+                    let sb = document.getElementById('sidebar-filters');
+                    if(sb) sb.style.setProperty('display','none','important');
+                    let tc = document.getElementById('tabs-container');
+                    if(tc) tc.classList.remove('hidden');
+                    if(activeTab) activeTab.style.setProperty('display','block','important');
+                },
+                // ── Cleanup ──
+                function() {
+                    document.body.classList.remove('is-printing', printClass);
+                    let ph = document.getElementById('printHeader');
                     if(ph) ph.classList.add('hidden');
-                    if(ss) ss.style.display = 'none';
-                    if(sb) sb.style.display = '';
-                    if(activeTab) activeTab.style.display = '';
-                    Object.values(chartsInstance).forEach(c => { if(c && c.canvas) c.resize(); });
-                }, 500);
-            }, 100);
+                    let sb = document.getElementById('sidebar-filters');
+                    if(sb) sb.style.removeProperty('display');
+                    if(activeTab) activeTab.style.removeProperty('display');
+                }
+            );
         };
         
         /* ── دوال التحكم في طباعة مخصصة ── */
@@ -4000,25 +4276,29 @@
             let ph = document.getElementById('printHeader'); if(ph) ph.classList.remove('hidden');
             setTxt('printReportMode', "تقرير إداري مخصص");
 
-            setTimeout(() => {
-                Object.values(chartsInstance).forEach(c => { if(c && c.canvas) { c.resize(); c.update('none'); } });
-                setTimeout(() => {
+            // استخدام Pipeline الاحترافي
+            window._prepareChartsForPrint().then(function() {
+                setTimeout(function() {
                     window.print();
-                    document.body.classList.remove('is-printing', 'print-custom-tabs');
-                    if(ph) ph.classList.add('hidden');
-                    document.querySelectorAll('.tab-content').forEach(el => {
-                        el.classList.remove('is-selected-for-print', 'print-kpi-only');
-                        el.style.display = '';
-                        el.style.pageBreakBefore = '';
-                    });
-                    const _sc2 = document.getElementById('seasons-analysis-print-container');
-                    if(_sc2){ _sc2.innerHTML=''; _sc2.style.display='none'; }
-                    const _oc2 = document.getElementById('outages-analysis-print-container');
-                    if(_oc2){ _oc2.innerHTML=''; _oc2.style.display='none'; }
-                    window.goHome();
-                    setTimeout(() => { Object.values(chartsInstance).forEach(c => { if(c && c.canvas) c.resize(); }); }, 100);
-                }, 800);
-            }, 100);
+                    setTimeout(function() {
+                        window._restoreChartsAfterPrint();
+                        document.body.classList.remove('is-printing', 'print-custom-tabs');
+                        if(ph) ph.classList.add('hidden');
+                        let sb2 = document.getElementById('sidebar-filters');
+                        if(sb2) sb2.style.removeProperty('display');
+                        document.querySelectorAll('.tab-content').forEach(el => {
+                            el.classList.remove('is-selected-for-print', 'print-kpi-only');
+                            el.style.display = '';
+                            el.style.pageBreakBefore = '';
+                        });
+                        const _sc2 = document.getElementById('seasons-analysis-print-container');
+                        if(_sc2){ _sc2.innerHTML=''; _sc2.style.display='none'; }
+                        const _oc2 = document.getElementById('outages-analysis-print-container');
+                        if(_oc2){ _oc2.innerHTML=''; _oc2.style.display='none'; }
+                        window.goHome();
+                    }, 300);
+                }, 400);
+            });
         };
 
         window.exportTableToExcel = function(tId, fn){ let tb=document.getElementById(tId); if(!tb)return; let wb=XLSX.utils.table_to_book(tb,{sheet:"Sheet1"}); XLSX.writeFile(wb,`${fn}_${new Date().getTime()}.xlsx`); };
